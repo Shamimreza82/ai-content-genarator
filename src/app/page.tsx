@@ -1,103 +1,198 @@
-import Image from "next/image";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+'use client';
 
-export default function Home() {
+import React, { useState, ReactNode, ChangeEvent } from 'react';
+import { motion } from 'framer-motion';
+import { Loader2, Edit3 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
+// --- Button Props ---
+interface ButtonProps {
+  onClick: () => void;
+  loading: boolean;
+  children: ReactNode;
+}
+function Button({ onClick, loading, children }: ButtonProps) {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <motion.button
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition"
+      onClick={onClick}
+      disabled={loading}
+    >
+      {loading ? (
+        <Loader2 className="animate-spin h-5 w-5" />
+      ) : (
+        <Edit3 className="h-5 w-5" />
+      )}
+      {children}
+    </motion.button>
+  );
+}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+// --- TextArea Props ---
+interface TextAreaProps {
+  value: string;
+  onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
+}
+function TextArea({ value, onChange }: TextAreaProps) {
+  return (
+    <div className="relative flex-1">
+      <textarea
+        id="prompt"
+        className="peer w-full h-32 p-4 pt-6 border-0 bg-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-300 transition resize-none"
+        placeholder=" "
+        value={value}
+        onChange={onChange}
+      />
+      <label
+        htmlFor="prompt"
+        className="absolute top-2 left-4 text-gray-500 text-sm peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-sm transition"
+      >
+        Enter your topic...
+      </label>
     </div>
+  );
+}
+
+// --- Select Props ---
+interface SelectOption {
+  value: string;
+  label: string;
+}
+interface SelectProps {
+  value: string;
+  onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
+  options: SelectOption[];
+}
+function Select({ value, onChange, options }: SelectProps) {
+  return (
+    <div className="relative w-40">
+      <select
+        id="tone"
+        className="peer w-full p-3 pt-6 border-0 bg-gray-100 rounded-2xl focus:ring-2 focus:ring-pink-300 transition appearance-none"
+        value={value}
+        onChange={onChange}
+      >
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+      <label
+        htmlFor="tone"
+        className="absolute top-2 left-4 text-gray-500 text-sm peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-sm transition"
+      >
+        Select tone
+      </label>
+    </div>
+  );
+}
+
+// --- MarkdownResult Props ---
+interface MarkdownResultProps {
+  content: string;
+}
+function MarkdownResult({ content }: MarkdownResultProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="prose prose-lg max-w-none mt-8 bg-white p-6 rounded-2xl shadow-md"
+    >
+      <ReactMarkdown
+        components={{
+          code({ node, className, children, ...props }) {
+            const match = /language-(\w+)/.exec(className || '');
+            const isInline = (props as any).inline;
+            return !isInline && match ? (
+              <SyntaxHighlighter
+                language="javascript"
+                style={atomDark} // This is correct!
+                customStyle={{ borderRadius: 8 }} // Use this for your own CSS
+              >
+                {`const x = 1;`}
+              </SyntaxHighlighter>
+            ) : (
+              <code className={className} {...props} />
+            );
+          },
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </motion.div>
+  );
+}
+
+// --- Home Page ---
+export default function Home() {
+  const [prompt, setPrompt] = useState<string>('');
+  const [tone, setTone] = useState<string>('friendly');
+  const [result, setResult] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+
+
+  const generate = async () => {
+    if (!prompt.trim()) return;
+    setLoading(true);
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        body: JSON.stringify({ prompt, tone }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data: { result: string } = await res.json();
+      setResult(data.result);
+    } catch (error) {
+      console.error(error);
+      // optionally show an error state
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-700 to-gray-900 flex items-center justify-center p-8">
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="bg-white bg-opacity-80 backdrop-blur-xl rounded-3xl shadow-2xl max-w-4xl w-full p-10 flex flex-col"
+      >
+        <h1 className="flex items-center justify-center space-x-3 text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-pink-400 mb-6">
+          <Edit3 className="h-8 w-8" />
+          <span>AI Content Generator</span>
+        </h1>
+
+        <div className="flex flex-col md:flex-row gap-8 mb-6">
+          <TextArea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+          />
+          <Select
+            value={tone}
+            onChange={(e) => setTone(e.target.value)}
+            options={[
+              { value: 'friendly', label: 'Friendly' },
+              { value: 'formal', label: 'Formal' },
+              { value: 'witty', label: 'Witty' },
+            ]}
+          />
+        </div>
+
+        <Button onClick={generate} loading={loading}>
+          Generate Content
+        </Button>
+
+        {result && <MarkdownResult content={result} />}
+      </motion.div>
+    </main>
   );
 }
