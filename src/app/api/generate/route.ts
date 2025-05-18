@@ -1,22 +1,42 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+import { aiModel } from '@/utils/aiModel';
+
+import { NextRequest, NextResponse } from 'next/server';
+
+
+
 
 export async function POST(req: NextRequest) {
   try {
-    const { prompt, tone } = await req.json();
+    const { prompt } = await req.json();
 
-    const finalPrompt = `Write a ${tone} blog, caption, or ad copy: ${prompt}`;
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' }); // or 'gemini-1.5-flash' if enabled
-    const result = await model.generateContent(finalPrompt);
-    const response = await result.response;
-    const text = response.text();
+    const promptText = `Write a blog for me : ${prompt}`;
 
-    return NextResponse.json({ result: text || 'No response from Gemini.' });
+    const result = await aiModel(promptText)
+
+    // const result = await openAiModel(prompt)
+
+    const cleanResult = result? JSON.parse(result.replace(/```json\s*([\s\S]*?)\s*```/, '$1')): null;
+
+
+    console.log(cleanResult)
+
+
+
+    return NextResponse.json({
+      success: true,
+      message: "generate blog successfully",
+      status: 200,
+      result: cleanResult || 'No response from Gemini.'
+    });
+
+
   } catch (error) {
     console.error('Error calling Gemini API:', error);
     return NextResponse.json({ error: 'Failed to generate content.' }, { status: 500 });
   }
 }
+
+
+/////gpt-image-1
